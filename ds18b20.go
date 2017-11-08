@@ -29,10 +29,10 @@ type Reading struct {
 
 func Sensors() ([]Sensor, error) {
 	w1m, err := os.Open(filepath.Join(w1root, w1master))
-	defer w1m.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer w1m.Close()
 
 	sc := bufio.NewScanner(w1m)
 	sc.Split(bufio.ScanLines)
@@ -49,7 +49,7 @@ func Sensors() ([]Sensor, error) {
 		}
 	}
 	if err = sc.Err(); err != nil {
-		return sensors, err
+		return nil, err
 	}
 
 	return sensors, nil
@@ -62,19 +62,22 @@ func (s *Sensor) Reading() (*Reading, error) {
 	}
 	defer data.Close()
 
-	scanner := bufio.NewScanner(data)
-	scanner.Split(bufio.ScanLines)
+	sc := bufio.NewScanner(data)
+	sc.Split(bufio.ScanLines)
 
 	var lines []string
-	for scanner.Scan() {
+	for sc.Scan() {
 		lines = append(lines, scanner.Text())
+	}
+	if err = sc.Err(); err != nil {
+		return nil, err
 	}
 
 	if len(lines) < 2 {
 		return nil, fmt.Errorf("sensor id: %s. not enough data in file", s.ID)
 	}
 
-	if lines[0][len(lines[0])-3:] != "YES" {
+	if !strings.HasSuffix(lines[0], "YES") {
 		return nil, fmt.Errorf("sensor id: %s. wrong checksum", s.ID)
 	}
 
