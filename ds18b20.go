@@ -87,9 +87,5 @@ func (s *Sensor) Reading() (*Reading, error) {
 		return nil, fmt.Errorf("sensor id: %s. could not parse temperature:%s", s.ID, lines[1][tempIndex+1:])
 	}
 
-	var r *Reading
-	r.Date = time.Now()
-	r.Value = celsius / 1000.0
-
-	return r, nil
+	return &Reading{Date: time.Now(), Value: celsius / 1000.0}, nil
 }
