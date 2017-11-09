@@ -35,8 +35,6 @@ func Sensors() ([]Sensor, error) {
 	defer w1m.Close()
 
 	sc := bufio.NewScanner(w1m)
-	sc.Split(bufio.ScanLines)
-
 	var sensors []Sensor
 	devName := ""
 	for sc.Scan() {
@@ -63,11 +61,9 @@ func (s *Sensor) Reading() (*Reading, error) {
 	defer data.Close()
 
 	sc := bufio.NewScanner(data)
-	sc.Split(bufio.ScanLines)
-
 	var lines []string
 	for sc.Scan() {
-		lines = append(lines, scanner.Text())
+		lines = append(lines, sc.Text())
 	}
 	if err = sc.Err(); err != nil {
 		return nil, err
